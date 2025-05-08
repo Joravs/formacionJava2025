@@ -1,4 +1,4 @@
-package com.edisa.formacion.mayo2025;
+package com.edisa.formacion.mayo2025.qr_code;
 
 public class Main {
     public static void main(String[] args) {
