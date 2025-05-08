@@ -14,10 +14,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 
 import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.multi.qrcode.QRCodeMultiReader;
+import com.google.zxing.multi.GenericMultipleBarcodeReader;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 @Path("/api")
@@ -57,14 +57,24 @@ public class Recursos {
             LuminanceSource fuente = new BufferedImageLuminanceSource(imagen);
             BinaryBitmap bt = new BinaryBitmap(new HybridBinarizer(fuente));
 
-            QRCodeMultiReader reader = new QRCodeMultiReader();
-            Result[] resultados = reader.decodeMultiple(bt);
+            Map<DecodeHintType, Object> hints = new EnumMap<>(DecodeHintType.class);
+            hints.put(DecodeHintType.POSSIBLE_FORMATS, EnumSet.allOf(BarcodeFormat.class));
+            hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
 
-            for(Result resultado : resultados){
-                CodeBar codeBar = new CodeBar(resultado);
-                codeList.add(codeBar);
+            MultiFormatReader multi = new MultiFormatReader();
+
+            GenericMultipleBarcodeReader reader = new GenericMultipleBarcodeReader(multi);
+            Result[] resultados = reader.decodeMultiple(bt);
+            if (resultados != null && resultados.length > 0){
+                for(Result resultado : resultados){
+                    CodeBar codeBar = new CodeBar(resultado);
+                    codeList.add(codeBar);
+                }
+                return Response.ok(codeList).build();
             }
-            return Response.ok(codeList).build();
+            else {
+                return Response.status(403).build();
+            }
         } catch (NotFoundException e){
             System.err.println("No se encontro un codigo de barras legible en la imagen");
             return Response.status(403).build();
