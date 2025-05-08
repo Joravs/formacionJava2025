@@ -18,5 +18,6 @@ public class Main extends Application<DropWizardConfiguration> {
     public void run(DropWizardConfiguration configuration, Environment environment) {
         final Recursos resource = new Recursos();
         environment.jersey().register(resource);
+        environment.jersey().register(org.glassfish.jersey.media.multipart.MultiPartFeature.class);
     }
 }
